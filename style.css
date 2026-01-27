@@ -1,0 +1,558 @@
+/* 현대아이티 스마트보드 렌탈 견적 - 스타일시트 */
+/* Copyright 2026 Hyundai IT */
+
+:root {
+    --primary: #1a237e;
+    --primary-light: #3949ab;
+    --accent: #0d47a1;
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --text: #212121;
+    --text-secondary: #616161;
+    --border: #e0e0e0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --blue: #1565c0;
+    --green: #2e7d32;
+    --red: #c62828;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 헤더 */
+.header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-area img {
+    height: 28px;
+    filter: brightness(0) invert(1);
+}
+
+.logo-area h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+}
+
+.header-badge {
+    font-size: 11px;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* 탭 네비게이션 */
+.tab-nav {
+    display: flex;
+    background: rgba(0,0,0,0.15);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+}
+
+.tab-btn.active {
+    color: white;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    width: 60%;
+    height: 3px;
+    background: white;
+    border-radius: 3px 3px 0 0;
+}
+
+/* 메인 컨텐츠 */
+.main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-bottom: 80px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 선택 폼 */
+.select-group {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.select-group h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.select-group h2 .icon {
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-field {
+    margin-bottom: 14px;
+}
+
+.form-field:last-child {
+    margin-bottom: 0;
+}
+
+.form-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-field select {
+    width: 100%;
+    padding: 12px 40px 12px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23616161'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.form-field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+}
+
+.form-field select:disabled {
+    background-color: #f5f5f5;
+    color: #bdbdbd;
+    cursor: not-allowed;
+}
+
+/* 카테고리 뱃지 */
+.category-badges {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.category-badge {
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.category-badge[data-cat="인기기업형"] {
+    background: #e3f2fd;
+    color: var(--blue);
+    border-color: #bbdefb;
+}
+.category-badge[data-cat="인기기업형"].active,
+.category-badge[data-cat="인기기업형"]:active {
+    background: var(--blue);
+    color: white;
+}
+
+.category-badge[data-cat="저가형"] {
+    background: #e8f5e9;
+    color: var(--green);
+    border-color: #c8e6c9;
+}
+.category-badge[data-cat="저가형"].active,
+.category-badge[data-cat="저가형"]:active {
+    background: var(--green);
+    color: white;
+}
+
+.category-badge[data-cat="최신형"] {
+    background: #ffebee;
+    color: var(--red);
+    border-color: #ffcdd2;
+}
+.category-badge[data-cat="최신형"].active,
+.category-badge[data-cat="최신형"]:active {
+    background: var(--red);
+    color: white;
+}
+
+/* 결과 영역 */
+.result-section {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.result-section.show {
+    display: block;
+}
+
+.result-header {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.result-product-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.result-spec {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.deposit-display {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.deposit-display.blue { background: #e3f2fd; color: var(--blue); }
+.deposit-display.green { background: #e8f5e9; color: var(--green); }
+.deposit-display.red { background: #ffebee; color: var(--red); }
+
+/* 가격 카드 그리드 */
+.price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.price-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.price-card:active {
+    transform: scale(0.98);
+}
+
+.price-card.recommended {
+    border-color: var(--primary);
+}
+
+.price-card.recommended::before {
+    content: 'BEST';
+    position: absolute;
+    top: 8px;
+    right: -20px;
+    background: var(--primary);
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 24px;
+    transform: rotate(45deg);
+    letter-spacing: 1px;
+}
+
+.price-period {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.price-period strong {
+    font-size: 22px;
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.price-monthly {
+    margin-bottom: 8px;
+}
+
+.price-monthly .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.price-monthly .amount {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.price-monthly .won {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.price-total {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+}
+
+.price-total .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.price-total .amount {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+/* 카테고리별 월 렌탈료 색상 */
+.color-blue .price-monthly .amount { color: var(--blue); }
+.color-green .price-monthly .amount { color: var(--green); }
+.color-red .price-monthly .amount { color: var(--red); }
+
+/* 안내 문구 */
+.notice-box {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.notice-box p {
+    font-size: 12px;
+    color: #e65100;
+    line-height: 1.6;
+}
+
+.notice-box p + p {
+    margin-top: 4px;
+}
+
+/* 강점 페이지 */
+.strength-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    text-align: center;
+}
+
+.strength-section h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.strength-section img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.strength-tip {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* 푸터 */
+.footer {
+    text-align: center;
+    padding: 20px 16px;
+    font-size: 11px;
+    color: #9e9e9e;
+    line-height: 1.6;
+}
+
+/* 반응형 - PC */
+@media (min-width: 768px) {
+    .main {
+        max-width: 720px;
+        padding: 24px;
+    }
+
+    .header-top {
+        padding: 16px 24px;
+    }
+
+    .logo-area h1 {
+        font-size: 18px;
+    }
+
+    .logo-area img {
+        height: 34px;
+    }
+
+    .price-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .select-group {
+        padding: 24px;
+    }
+
+    .form-field select {
+        font-size: 16px;
+    }
+
+    .strength-section img {
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .main {
+        max-width: 900px;
+    }
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+/* PWA 설치 버튼 */
+.install-btn {
+    display: none;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.install-btn:active {
+    background: rgba(255,255,255,0.3);
+}
+
+.install-btn.show {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 가로 스크롤 힌트 (strength) */
+.scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+}
