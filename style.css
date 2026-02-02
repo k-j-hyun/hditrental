@@ -210,6 +210,47 @@ body {
     cursor: not-allowed;
 }
 
+/* 렌탈 유형 뱃지 */
+.rental-type-badges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.rental-type-badge {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: white;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.rental-type-badge .badge-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.rental-type-badge .badge-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.rental-type-badge.active {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.05) 0%, rgba(57, 73, 171, 0.05) 100%);
+}
+
+.rental-type-badge.active .badge-title {
+    color: var(--primary);
+}
+
 /* 카테고리 뱃지 */
 .category-badges {
     display: flex;
@@ -219,7 +260,7 @@ body {
 }
 
 .category-badge {
-    padding: 8px 16px;
+    padding: 10px 16px;
     border-radius: 24px;
     font-size: 13px;
     font-weight: 600;
@@ -227,17 +268,38 @@ body {
     cursor: pointer;
     transition: var(--transition);
     white-space: nowrap;
+    position: relative;
 }
 
-.category-badge[data-cat="인기기업형"] {
+.category-badge .badge-label {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-badge[data-cat="MX"] {
     background: #e3f2fd;
     color: var(--blue);
     border-color: #bbdefb;
 }
-.category-badge[data-cat="인기기업형"].active,
-.category-badge[data-cat="인기기업형"]:active {
+.category-badge[data-cat="MX"] .badge-label {
     background: var(--blue);
     color: white;
+}
+.category-badge[data-cat="MX"].active,
+.category-badge[data-cat="MX"]:active {
+    background: var(--blue);
+    color: white;
+}
+.category-badge[data-cat="MX"].active .badge-label {
+    background: white;
+    color: var(--blue);
 }
 
 .category-badge[data-cat="저가형"] {
@@ -251,15 +313,23 @@ body {
     color: white;
 }
 
-.category-badge[data-cat="최신형"] {
+.category-badge[data-cat="IX"] {
     background: #ffebee;
     color: var(--red);
     border-color: #ffcdd2;
 }
-.category-badge[data-cat="최신형"].active,
-.category-badge[data-cat="최신형"]:active {
+.category-badge[data-cat="IX"] .badge-label {
     background: var(--red);
     color: white;
+}
+.category-badge[data-cat="IX"].active,
+.category-badge[data-cat="IX"]:active {
+    background: var(--red);
+    color: white;
+}
+.category-badge[data-cat="IX"].active .badge-label {
+    background: white;
+    color: var(--red);
 }
 
 /* 결과 영역 */
@@ -407,6 +477,79 @@ body {
 .color-green .price-monthly .amount { color: var(--green); }
 .color-red .price-monthly .amount { color: var(--red); }
 
+/* 제품 스펙 섹션 */
+.spec-section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.spec-section h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.spec-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.spec-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.spec-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.spec-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* 사은품 박스 */
+.gift-box {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.gift-label {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: #ff9800;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.gift-items {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e65100;
+    line-height: 1.5;
+}
+
 /* 안내 문구 */
 .notice-box {
     background: #fff8e1;
@@ -497,6 +640,31 @@ body {
     .strength-section img {
         max-width: 100%;
     }
+
+    .rental-type-badges {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .rental-type-badge {
+        padding: 18px 20px;
+    }
+
+    .rental-type-badge .badge-title {
+        font-size: 16px;
+    }
+
+    .rental-type-badge .badge-desc {
+        font-size: 12px;
+    }
+
+    .spec-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .spec-section {
+        padding: 24px;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -528,7 +696,9 @@ body {
 
 /* PWA 설치 버튼 */
 .install-btn {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     background: rgba(255,255,255,0.2);
     color: white;
     border: 1px solid rgba(255,255,255,0.3);
@@ -544,10 +714,8 @@ body {
     background: rgba(255,255,255,0.3);
 }
 
-.install-btn.show {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+.install-btn.hide {
+    display: none;
 }
 
 /* 가로 스크롤 힌트 (strength) */

@@ -38,26 +38,40 @@
     <main class="main">
         <!-- 렌탈 견적 탭 -->
         <div id="tab-quote" class="tab-content active">
-            <!-- 카테고리 선택 -->
+            <!-- 렌탈 유형 선택 -->
             <div class="select-group">
-                <h2><span class="icon">1</span> 제품 선택</h2>
-                <div class="category-badges" id="categoryBadges">
-                    <button class="category-badge" data-cat="인기기업형" onclick="selectCategory('인기기업형')">인기기업형 (MX)</button>
-                    <button class="category-badge" data-cat="저가형" onclick="selectCategory('저가형')">저가형</button>
-                    <button class="category-badge" data-cat="최신형" onclick="selectCategory('최신형')">최신형 (IX)</button>
+                <h2><span class="icon">1</span> 렌탈 유형</h2>
+                <div class="rental-type-badges" id="rentalTypeBadges">
+                    <button class="rental-type-badge active" data-type="선납렌탈" onclick="selectRentalType('선납렌탈')">
+                        <span class="badge-title">선납렌탈</span>
+                        <span class="badge-desc">선납금 납부 후 낮은 월 렌탈료</span>
+                    </button>
+                    <button class="rental-type-badge" data-type="일반렌탈" onclick="selectRentalType('일반렌탈')">
+                        <span class="badge-title">일반렌탈</span>
+                        <span class="badge-desc">선납금 없이 월 렌탈료만 납부</span>
+                    </button>
                 </div>
+            </div>
 
-                <div class="form-field">
-                    <label>제품 라인</label>
-                    <select id="selLine" onchange="onLineChange()" disabled>
-                        <option value="">카테고리를 먼저 선택하세요</option>
-                    </select>
+            <!-- 제품 선택 -->
+            <div class="select-group">
+                <h2><span class="icon">2</span> 제품 선택</h2>
+                <div class="category-badges" id="categoryBadges">
+                    <button class="category-badge" data-cat="MX" onclick="selectCategory('MX')">
+                        <span class="badge-label">인기</span>
+                        MX (기업형)
+                    </button>
+                    <button class="category-badge" data-cat="IX" onclick="selectCategory('IX')">
+                        <span class="badge-label">최신</span>
+                        IX (프리미엄)
+                    </button>
+                    <button class="category-badge" data-cat="저가형" onclick="selectCategory('저가형')">저가형</button>
                 </div>
 
                 <div class="form-field">
                     <label>화면 크기</label>
                     <select id="selSize" onchange="onSizeChange()" disabled>
-                        <option value="">제품 라인을 먼저 선택하세요</option>
+                        <option value="">제품을 먼저 선택하세요</option>
                     </select>
                 </div>
 
@@ -76,13 +90,23 @@
                 </div>
             </div>
 
+            <!-- 제품 스펙 정보 -->
+            <div class="spec-section" id="specSection" style="display:none">
+                <h3>제품 사양</h3>
+                <div class="spec-grid" id="specGrid"></div>
+                <div class="gift-box" id="giftBox" style="display:none">
+                    <span class="gift-label">사은품</span>
+                    <span class="gift-items" id="giftItems"></span>
+                </div>
+            </div>
+
             <!-- 결과 영역 -->
             <div class="result-section" id="resultSection">
                 <div class="result-header" id="resultHeader"></div>
                 <div class="price-grid" id="priceGrid"></div>
                 <div class="notice-box">
                     <p>* 상기 금액은 부가세 별도 금액입니다.</p>
-                    <p>* 선납 렌탈 상품으로, 선납금은 계약 시 납부합니다.</p>
+                    <p id="noticeDeposit">* 선납 렌탈 상품으로, 선납금은 계약 시 납부합니다.</p>
                     <p>* 렌탈 기간 종료 후 제품 소유권이 이전됩니다.</p>
                 </div>
             </div>
@@ -113,85 +137,193 @@
 
     <script>
     // 렌탈 데이터
-    const DATA = [
-        {"line":"MX","category":"인기기업형","size":"55\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":500000,
-         "prices":{"24":{"monthly":58500,"total":1904000},"36":{"monthly":44000,"total":2084000},"48":{"monthly":38700,"total":2357600},"60":{"monthly":36600,"total":2696000}}},
-        {"line":"MX","category":"인기기업형","size":"55\"","type":"스탠드","typeDetail":"원목스탠드","deposit":500000,
-         "prices":{"24":{"monthly":67300,"total":2115200},"36":{"monthly":50400,"total":2314400},"48":{"monthly":44600,"total":2640800},"60":{"monthly":42000,"total":3020000}}},
-        {"line":"MX","category":"인기기업형","size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":127000,"total":4048000},"36":{"monthly":95000,"total":4420000},"48":{"monthly":83000,"total":4984000},"60":{"monthly":78000,"total":5680000}}},
-        {"line":"MX","category":"인기기업형","size":"65\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":158000,"total":4792000},"36":{"monthly":118000,"total":5248000},"48":{"monthly":104000,"total":5992000},"60":{"monthly":97000,"total":6820000}}},
-        {"line":"MX","category":"인기기업형","size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":143000,"total":4432000},"36":{"monthly":107000,"total":4852000},"48":{"monthly":93000,"total":5464000},"60":{"monthly":88000,"total":6280000}}},
-        {"line":"MX","category":"인기기업형","size":"75\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":175000,"total":5200000},"36":{"monthly":130000,"total":5680000},"48":{"monthly":114000,"total":6472000},"60":{"monthly":106000,"total":7360000}}},
-        {"line":"MX","category":"인기기업형","size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":183000,"total":5392000},"36":{"monthly":137000,"total":5932000},"48":{"monthly":118000,"total":6664000},"60":{"monthly":111000,"total":7660000}}},
-        {"line":"MX","category":"인기기업형","size":"86\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":215000,"total":6160000},"36":{"monthly":160000,"total":6760000},"48":{"monthly":140000,"total":7720000},"60":{"monthly":130000,"total":8800000}}},
-        {"line":"MX","category":"인기기업형","size":"86\" 프리미엄","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":204000,"total":5896000},"36":{"monthly":154000,"total":6544000},"48":{"monthly":134000,"total":7432000},"60":{"monthly":125000,"total":8500000}}},
-        {"line":"MX","category":"인기기업형","size":"86\" 프리미엄","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":236000,"total":6664000},"36":{"monthly":175000,"total":7300000},"48":{"monthly":153000,"total":8344000},"60":{"monthly":142000,"total":9520000}}},
-        {"line":"MX","category":"인기기업형","size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
-         "prices":{"24":{"monthly":339700,"total":10152800},"36":{"monthly":253100,"total":11111600},"48":{"monthly":222900,"total":12699200},"60":{"monthly":207600,"total":14456000}}},
-        {"line":"MX","category":"인기기업형","size":"98\"","type":"스탠드","typeDetail":"전동스탠드","deposit":2000000,
-         "prices":{"24":{"monthly":370900,"total":10901600},"36":{"monthly":281900,"total":12148400},"48":{"monthly":248400,"total":13923200},"60":{"monthly":231000,"total":15860000}}},
-        {"line":"N Series","category":"저가형","size":"NA 86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":121000,"total":3904000},"36":{"monthly":91000,"total":4276000},"48":{"monthly":80000,"total":4840000},"60":{"monthly":75000,"total":5500000}}},
-        {"line":"N Series","category":"저가형","size":"NA 86\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":144000,"total":4456000},"36":{"monthly":108000,"total":4888000},"48":{"monthly":95000,"total":5560000},"60":{"monthly":89000,"total":6340000}}},
-        {"line":"N Series","category":"저가형","size":"NW 86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":160000,"total":4840000},"36":{"monthly":116000,"total":5176000},"48":{"monthly":100000,"total":5800000},"60":{"monthly":91000,"total":6460000}}},
-        {"line":"N Series","category":"저가형","size":"NW 86\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":195000,"total":5680000},"36":{"monthly":141000,"total":6076000},"48":{"monthly":122000,"total":6856000},"60":{"monthly":110000,"total":7600000}}},
-        {"line":"A11","category":"저가형","size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":80000,"total":2920000},"36":{"monthly":61000,"total":3196000},"48":{"monthly":55000,"total":3640000},"60":{"monthly":52000,"total":4120000}}},
-        {"line":"A11","category":"저가형","size":"75\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":111000,"total":3664000},"36":{"monthly":84000,"total":4024000},"48":{"monthly":75000,"total":4600000},"60":{"monthly":70000,"total":5200000}}},
-        {"line":"A13","category":"저가형","size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":80000,"total":2920000},"36":{"monthly":61000,"total":3196000},"48":{"monthly":55000,"total":3640000},"60":{"monthly":52000,"total":4120000}}},
-        {"line":"A13","category":"저가형","size":"65\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":111000,"total":3664000},"36":{"monthly":84000,"total":4024000},"48":{"monthly":75000,"total":4600000},"60":{"monthly":70000,"total":5200000}}},
-        {"line":"α 3.0","category":"저가형","size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":94000,"total":3256000},"36":{"monthly":70000,"total":3520000},"48":{"monthly":62000,"total":3976000},"60":{"monthly":59000,"total":4540000}}},
-        {"line":"α 3.0","category":"저가형","size":"86\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":124000,"total":3976000},"36":{"monthly":93000,"total":4348000},"48":{"monthly":83000,"total":4984000},"60":{"monthly":77000,"total":5620000}}},
-        {"line":"IX","category":"최신형","size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":166000,"total":4984000},"36":{"monthly":123400,"total":5442400},"48":{"monthly":108900,"total":6227200},"60":{"monthly":100000,"total":7000000}}},
-        {"line":"IX","category":"최신형","size":"65\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":199000,"total":5776000},"36":{"monthly":146500,"total":6274000},"48":{"monthly":128000,"total":7144000},"60":{"monthly":118000,"total":8080000}}},
-        {"line":"IX","category":"최신형","size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
-         "prices":{"36":{"monthly":88500,"total":5186000},"48":{"monthly":80500,"total":5864000},"60":{"monthly":75900,"total":6554000}}},
-        {"line":"IX","category":"최신형","size":"65\"","type":"스탠드","typeDetail":"전동스탠드","deposit":2000000,
-         "prices":{"36":{"monthly":108800,"total":5916800},"48":{"monthly":97700,"total":6689600},"60":{"monthly":92000,"total":7520000}}},
-        {"line":"IX","category":"최신형","size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":206000,"total":5944000},"36":{"monthly":152900,"total":6504400},"48":{"monthly":134400,"total":7451200},"60":{"monthly":123000,"total":8380000}}},
-        {"line":"IX","category":"최신형","size":"75\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":238000,"total":6712000},"36":{"monthly":176000,"total":7336000},"48":{"monthly":153900,"total":8387200},"60":{"monthly":142000,"total":9520000}}},
-        {"line":"IX","category":"최신형","size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
-         "prices":{"36":{"monthly":114400,"total":6118400},"48":{"monthly":103000,"total":6944000},"60":{"monthly":96800,"total":7808000}}},
-        {"line":"IX","category":"최신형","size":"75\"","type":"스탠드","typeDetail":"전동스탠드","deposit":2000000,
-         "prices":{"36":{"monthly":134700,"total":6849200},"48":{"monthly":120200,"total":7769600},"60":{"monthly":112900,"total":8774000}}},
-        {"line":"IX","category":"최신형","size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
-         "prices":{"24":{"monthly":244000,"total":6856000},"36":{"monthly":180000,"total":7480000},"48":{"monthly":157300,"total":8550400},"60":{"monthly":145000,"total":9700000}}},
-        {"line":"IX","category":"최신형","size":"86\"","type":"스탠드","typeDetail":"전동스탠드","deposit":1000000,
-         "prices":{"24":{"monthly":275000,"total":7600000},"36":{"monthly":202000,"total":8272000},"48":{"monthly":177700,"total":9529600},"60":{"monthly":163000,"total":10780000}}},
-        {"line":"IX","category":"최신형","size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
-         "prices":{"36":{"monthly":138200,"total":6975200},"48":{"monthly":123200,"total":7913600},"60":{"monthly":115600,"total":8936000}}},
-        {"line":"IX","category":"최신형","size":"86\"","type":"스탠드","typeDetail":"전동스탠드","deposit":2000000,
-         "prices":{"36":{"monthly":157800,"total":7680800},"48":{"monthly":141200,"total":8777600},"60":{"monthly":131800,"total":9908000}}},
-        {"line":"IX","category":"최신형","size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
-         "prices":{"24":{"monthly":380000,"total":11120000},"36":{"monthly":282000,"total":12152000},"48":{"monthly":248300,"total":13918400},"60":{"monthly":229000,"total":15740000}}},
-        {"line":"IX","category":"최신형","size":"98\"","type":"스탠드","typeDetail":"전동스탠드","deposit":2000000,
-         "prices":{"24":{"monthly":411700,"total":11880800},"36":{"monthly":305900,"total":13012400},"48":{"monthly":268800,"total":14902400},"60":{"monthly":247000,"total":16820000}}},
-        {"line":"IX","category":"최신형","size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":4000000,
-         "prices":{"36":{"monthly":208500,"total":11506000},"48":{"monthly":188000,"total":13024000},"60":{"monthly":176900,"total":14614000}}},
-        {"line":"IX","category":"최신형","size":"98\"","type":"스탠드","typeDetail":"전동스탠드","deposit":4000000,
-         "prices":{"36":{"monthly":228800,"total":12236800},"48":{"monthly":206000,"total":13888000},"60":{"monthly":193000,"total":15580000}}}
-    ];
+    const DATA = {
+        // MX 선납렌탈
+        "MX선납렌탈": [
+            {"size":"55\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":500000,
+             "prices":{"24":{"monthly":58500,"total":1904000},"36":{"monthly":44000,"total":2084000},"48":{"monthly":38700,"total":2357600},"60":{"monthly":36600,"total":2696000}},
+             "spec":{"weight":"28kg","dimension":"1270.8 x 791.2mm","vesa":"-","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"55\"","type":"원목","typeDetail":"원목스탠드","deposit":500000,
+             "prices":{"24":{"monthly":67300,"total":2115200},"36":{"monthly":50400,"total":2314400},"48":{"monthly":44600,"total":2640800},"60":{"monthly":42000,"total":3020000}},
+             "spec":{"weight":"28kg","dimension":"1270.8 x 791.2mm","vesa":"-","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":127000,"total":4048000},"36":{"monthly":95000,"total":4420000},"48":{"monthly":83000,"total":4984000},"60":{"monthly":78000,"total":5680000}},
+             "spec":{"weight":"40kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"65\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":158000,"total":4792000},"36":{"monthly":118000,"total":5248000},"48":{"monthly":104000,"total":5992000},"60":{"monthly":97000,"total":6820000}},
+             "spec":{"weight":"40kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":143000,"total":4432000},"36":{"monthly":107000,"total":4852000},"48":{"monthly":93000,"total":5464000},"60":{"monthly":88000,"total":6280000}},
+             "spec":{"weight":"50kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"75\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":175000,"total":5200000},"36":{"monthly":132000,"total":5680000},"48":{"monthly":114000,"total":6472000},"60":{"monthly":106000,"total":7360000}},
+             "spec":{"weight":"50kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":183000,"total":5392000},"36":{"monthly":137000,"total":5932000},"48":{"monthly":118000,"total":6664000},"60":{"monthly":111000,"total":7660000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":215000,"total":6160000},"36":{"monthly":160000,"total":6760000},"48":{"monthly":140000,"total":7720000},"60":{"monthly":130000,"total":8800000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\" 프리미엄","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":204000,"total":5896000},"36":{"monthly":154000,"total":6544000},"48":{"monthly":134000,"total":7432000},"60":{"monthly":125000,"total":8500000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160","led":"QLED"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\" 프리미엄","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":236000,"total":6664000},"36":{"monthly":175000,"total":7300000},"48":{"monthly":153000,"total":8344000},"60":{"monthly":142000,"total":9520000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160","led":"QLED"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
+             "prices":{"24":{"monthly":339700,"total":10152800},"36":{"monthly":253100,"total":11111600},"48":{"monthly":222900,"total":12699200},"60":{"monthly":207600,"total":14456000}},
+             "spec":{"weight":"92kg","dimension":"2217 x 1331mm","vesa":"-","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"98\"","type":"전동","typeDetail":"전동스탠드","deposit":2000000,
+             "prices":{"24":{"monthly":370900,"total":10901600},"36":{"monthly":281900,"total":12148400},"48":{"monthly":248400,"total":13923200},"60":{"monthly":231000,"total":15860000}},
+             "spec":{"weight":"92kg","dimension":"2217 x 1331mm","vesa":"-","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"}
+        ],
+        // MX 일반렌탈
+        "MX일반렌탈": [
+            {"size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":365000,"total":4380000},"24":{"monthly":200000,"total":4800000},"36":{"monthly":147000,"total":5292000},"48":{"monthly":119000,"total":5712000}},
+             "spec":{"weight":"40kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"65\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":436000,"total":5232000},"24":{"monthly":239000,"total":5736000},"36":{"monthly":175000,"total":6300000},"48":{"monthly":143000,"total":6864000}},
+             "spec":{"weight":"40kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":399000,"total":4788000},"24":{"monthly":220000,"total":5280000},"36":{"monthly":162000,"total":5832000},"48":{"monthly":130000,"total":6240000}},
+             "spec":{"weight":"50kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"75\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":473000,"total":5676000},"24":{"monthly":260000,"total":6240000},"36":{"monthly":190000,"total":6840000},"48":{"monthly":155000,"total":7440000}},
+             "spec":{"weight":"50kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":490000,"total":5880000},"24":{"monthly":271000,"total":6504000},"36":{"monthly":199000,"total":7164000},"48":{"monthly":160000,"total":7680000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":566000,"total":6792000},"24":{"monthly":311000,"total":7464000},"36":{"monthly":228000,"total":8208000},"48":{"monthly":186000,"total":8928000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\" 프리미엄","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":540000,"total":6480000},"24":{"monthly":297000,"total":7128000},"36":{"monthly":220000,"total":7920000},"48":{"monthly":178000,"total":8544000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160","led":"QLED"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"86\" 프리미엄","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":612000,"total":7344000},"24":{"monthly":337000,"total":8088000},"36":{"monthly":246000,"total":8856000},"48":{"monthly":201000,"total":9648000}},
+             "spec":{"weight":"63kg","dimension":"1959.2 x 1180mm","vesa":"800x600","resolution":"3840x2160","led":"QLED"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":924000,"total":11088000},"24":{"monthly":508000,"total":12192000},"36":{"monthly":372000,"total":13392000},"48":{"monthly":304000,"total":14592000}},
+             "spec":{"weight":"92kg","dimension":"2217 x 1331mm","vesa":"-","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"},
+            {"size":"98\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":977000,"total":11724000},"24":{"monthly":547000,"total":13128000},"36":{"monthly":401000,"total":14436000},"48":{"monthly":327000,"total":15696000}},
+             "spec":{"weight":"92kg","dimension":"2217 x 1331mm","vesa":"-","resolution":"3840x2160"},"gift":"HDMI케이블, 데이터케이블"}
+        ],
+        // IX 선납렌탈
+        "IX선납렌탈": [
+            {"size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":166000,"total":4984000},"36":{"monthly":123400,"total":5442400},"48":{"monthly":108900,"total":6227200},"60":{"monthly":100000,"total":7000000}},
+             "spec":{"weight":"37kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"65\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":199000,"total":5776000},"36":{"monthly":146500,"total":6274000},"48":{"monthly":128000,"total":7144000},"60":{"monthly":118000,"total":8080000}},
+             "spec":{"weight":"37kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
+             "prices":{"36":{"monthly":88500,"total":5186000},"48":{"monthly":80500,"total":5864000},"60":{"monthly":75900,"total":6554000}},
+             "spec":{"weight":"37kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"65\"","type":"전동","typeDetail":"전동스탠드","deposit":2000000,
+             "prices":{"36":{"monthly":108800,"total":5916800},"48":{"monthly":97700,"total":6689600},"60":{"monthly":92000,"total":7520000}},
+             "spec":{"weight":"37kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":206000,"total":5944000},"36":{"monthly":152900,"total":6504400},"48":{"monthly":134400,"total":7451200},"60":{"monthly":123000,"total":8380000}},
+             "spec":{"weight":"51kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"75\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":238000,"total":6712000},"36":{"monthly":176000,"total":7336000},"48":{"monthly":153900,"total":8387200},"60":{"monthly":142000,"total":9520000}},
+             "spec":{"weight":"51kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
+             "prices":{"36":{"monthly":114400,"total":6118400},"48":{"monthly":103000,"total":6944000},"60":{"monthly":96800,"total":7808000}},
+             "spec":{"weight":"51kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"75\"","type":"전동","typeDetail":"전동스탠드","deposit":2000000,
+             "prices":{"36":{"monthly":134700,"total":6849200},"48":{"monthly":120200,"total":7769600},"60":{"monthly":112900,"total":8774000}},
+             "spec":{"weight":"51kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":244000,"total":6856000},"36":{"monthly":180000,"total":7480000},"48":{"monthly":157300,"total":8550400},"60":{"monthly":145000,"total":9700000}},
+             "spec":{"weight":"66kg","dimension":"1956.8 x 1178.4mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"86\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":275000,"total":7600000},"36":{"monthly":202000,"total":8272000},"48":{"monthly":177700,"total":9529600},"60":{"monthly":163000,"total":10780000}},
+             "spec":{"weight":"66kg","dimension":"1956.8 x 1178.4mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
+             "prices":{"36":{"monthly":138200,"total":6975200},"48":{"monthly":123200,"total":7913600},"60":{"monthly":115600,"total":8936000}},
+             "spec":{"weight":"66kg","dimension":"1956.8 x 1178.4mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"86\"","type":"전동","typeDetail":"전동스탠드","deposit":2000000,
+             "prices":{"36":{"monthly":157800,"total":7680800},"48":{"monthly":141200,"total":8777600},"60":{"monthly":131800,"total":9908000}},
+             "spec":{"weight":"66kg","dimension":"1956.8 x 1178.4mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":2000000,
+             "prices":{"24":{"monthly":380000,"total":11120000},"36":{"monthly":282000,"total":12152000},"48":{"monthly":248300,"total":13918400},"60":{"monthly":229000,"total":15740000}},
+             "spec":{"weight":"86kg","dimension":"2219.6 x 1326.3mm","vesa":"-","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"98\"","type":"전동","typeDetail":"전동스탠드","deposit":2000000,
+             "prices":{"24":{"monthly":411700,"total":11880800},"36":{"monthly":305900,"total":13012400},"48":{"monthly":268800,"total":14902400},"60":{"monthly":247000,"total":16820000}},
+             "spec":{"weight":"86kg","dimension":"2219.6 x 1326.3mm","vesa":"-","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":4000000,
+             "prices":{"36":{"monthly":208500,"total":11506000},"48":{"monthly":188000,"total":13024000},"60":{"monthly":176900,"total":14614000}},
+             "spec":{"weight":"86kg","dimension":"2219.6 x 1326.3mm","vesa":"-","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"98\"","type":"전동","typeDetail":"전동스탠드","deposit":4000000,
+             "prices":{"36":{"monthly":228800,"total":12236800},"48":{"monthly":206000,"total":13888000},"60":{"monthly":193000,"total":15580000}},
+             "spec":{"weight":"86kg","dimension":"2219.6 x 1326.3mm","vesa":"-","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"}
+        ],
+        // IX 일반렌탈
+        "IX일반렌탈": [
+            {"size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":453000,"total":5436000},"24":{"monthly":249000,"total":5976000},"36":{"monthly":182000,"total":6552000},"48":{"monthly":149000,"total":7152000}},
+             "spec":{"weight":"37kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"65\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":524000,"total":6288000},"24":{"monthly":288000,"total":6912000},"36":{"monthly":211000,"total":7596000},"48":{"monthly":172000,"total":8256000}},
+             "spec":{"weight":"37kg","dimension":"1490 x 915mm","vesa":"600x400","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":545000,"total":6540000},"24":{"monthly":299000,"total":7176000},"36":{"monthly":219000,"total":7884000},"48":{"monthly":179000,"total":8592000}},
+             "spec":{"weight":"51kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"75\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":616000,"total":7392000},"24":{"monthly":339000,"total":8136000},"36":{"monthly":248000,"total":8928000},"48":{"monthly":202000,"total":9696000}},
+             "spec":{"weight":"51kg","dimension":"1714.4 x 1042.6mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":629000,"total":7548000},"24":{"monthly":345000,"total":8280000},"36":{"monthly":253000,"total":9108000},"48":{"monthly":206000,"total":9888000}},
+             "spec":{"weight":"66kg","dimension":"1956.8 x 1178.4mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"86\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":700000,"total":8400000},"24":{"monthly":384000,"total":9216000},"36":{"monthly":281000,"total":10116000},"48":{"monthly":230000,"total":11040000}},
+             "spec":{"weight":"66kg","dimension":"1956.8 x 1178.4mm","vesa":"800x600","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"98\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":0,
+             "prices":{"12":{"monthly":1017000,"total":12204000},"24":{"monthly":559000,"total":13416000},"36":{"monthly":409000,"total":14724000},"48":{"monthly":334000,"total":16032000}},
+             "spec":{"weight":"86kg","dimension":"2219.6 x 1326.3mm","vesa":"-","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"},
+            {"size":"98\"","type":"전동","typeDetail":"전동스탠드","deposit":0,
+             "prices":{"12":{"monthly":1088000,"total":13056000},"24":{"monthly":598000,"total":14352000},"36":{"monthly":438000,"total":15768000},"48":{"monthly":358000,"total":17184000}},
+             "spec":{"weight":"86kg","dimension":"2219.6 x 1326.3mm","vesa":"-","resolution":"3840x2160"},"gift":"고급사운드바, 무선미러링동글, 트랙볼키보드, 썬더볼트C to C(1m), 스마트펜, 일반전자펜2, 핫키장착, 3년AS, 액정파손1회무료, 전담CX매니저, 판서(50만)"}
+        ],
+        // 저가형 (기존 데이터 유지)
+        "저가형": [
+            {"line":"N Series","size":"NA 86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":121000,"total":3904000},"36":{"monthly":91000,"total":4276000},"48":{"monthly":80000,"total":4840000},"60":{"monthly":75000,"total":5500000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"N Series","size":"NA 86\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":144000,"total":4456000},"36":{"monthly":108000,"total":4888000},"48":{"monthly":95000,"total":5560000},"60":{"monthly":89000,"total":6340000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"N Series","size":"NW 86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":160000,"total":4840000},"36":{"monthly":116000,"total":5176000},"48":{"monthly":100000,"total":5800000},"60":{"monthly":91000,"total":6460000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"N Series","size":"NW 86\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":195000,"total":5680000},"36":{"monthly":141000,"total":6076000},"48":{"monthly":122000,"total":6856000},"60":{"monthly":110000,"total":7600000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"A11","size":"75\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":80000,"total":2920000},"36":{"monthly":61000,"total":3196000},"48":{"monthly":55000,"total":3640000},"60":{"monthly":52000,"total":4120000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"A11","size":"75\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":111000,"total":3664000},"36":{"monthly":84000,"total":4024000},"48":{"monthly":75000,"total":4600000},"60":{"monthly":70000,"total":5200000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"A13","size":"65\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":80000,"total":2920000},"36":{"monthly":61000,"total":3196000},"48":{"monthly":55000,"total":3640000},"60":{"monthly":52000,"total":4120000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"A13","size":"65\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":111000,"total":3664000},"36":{"monthly":84000,"total":4024000},"48":{"monthly":75000,"total":4600000},"60":{"monthly":70000,"total":5200000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"α 3.0","size":"86\"","type":"벽걸이","typeDetail":"벽걸이형","deposit":1000000,
+             "prices":{"24":{"monthly":94000,"total":3256000},"36":{"monthly":70000,"total":3520000},"48":{"monthly":62000,"total":3976000},"60":{"monthly":59000,"total":4540000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}},
+            {"line":"α 3.0","size":"86\"","type":"전동","typeDetail":"전동스탠드","deposit":1000000,
+             "prices":{"24":{"monthly":124000,"total":3976000},"36":{"monthly":93000,"total":4348000},"48":{"monthly":83000,"total":4984000},"60":{"monthly":77000,"total":5620000}},
+             "spec":{"weight":"-","dimension":"-","vesa":"-","resolution":"3840x2160"}}
+        ]
+    };
 
+    let currentRentalType = '선납렌탈';
     let currentCategory = null;
     let deferredPrompt = null;
 
@@ -207,9 +339,9 @@
 
     // 카테고리 색상
     function getCatColor(cat) {
-        if (cat === '인기기업형') return 'blue';
+        if (cat === 'MX') return 'blue';
+        if (cat === 'IX') return 'red';
         if (cat === '저가형') return 'green';
-        if (cat === '최신형') return 'red';
         return 'blue';
     }
 
@@ -221,6 +353,39 @@
         event.target.classList.add('active');
     }
 
+    // 렌탈 유형 선택
+    function selectRentalType(type) {
+        currentRentalType = type;
+        document.querySelectorAll('.rental-type-badge').forEach(el => {
+            el.classList.toggle('active', el.dataset.type === type);
+        });
+
+        // 안내문구 업데이트
+        const noticeDeposit = document.getElementById('noticeDeposit');
+        if (type === '일반렌탈') {
+            noticeDeposit.textContent = '* 일반 렌탈 상품으로, 선납금 없이 월 렌탈료만 납부합니다.';
+        } else {
+            noticeDeposit.textContent = '* 선납 렌탈 상품으로, 선납금은 계약 시 납부합니다.';
+        }
+
+        // 현재 선택된 카테고리가 있으면 다시 로드
+        if (currentCategory) {
+            selectCategory(currentCategory);
+        }
+    }
+
+    // 현재 데이터 키 가져오기
+    function getDataKey() {
+        if (currentCategory === '저가형') return '저가형';
+        return currentCategory + currentRentalType;
+    }
+
+    // 현재 데이터 배열 가져오기
+    function getCurrentData() {
+        const key = getDataKey();
+        return DATA[key] || [];
+    }
+
     // 카테고리 선택
     function selectCategory(cat) {
         currentCategory = cat;
@@ -228,31 +393,16 @@
             el.classList.toggle('active', el.dataset.cat === cat);
         });
 
-        const selLine = document.getElementById('selLine');
-        const lines = [...new Set(DATA.filter(d => d.category === cat).map(d => d.line))];
-
-        selLine.innerHTML = '<option value="">제품 라인 선택</option>';
-        lines.forEach(l => {
-            selLine.innerHTML += `<option value="${l}">${l}</option>`;
-        });
-        selLine.disabled = false;
-
-        // 라인이 하나면 자동 선택
-        if (lines.length === 1) {
-            selLine.value = lines[0];
-            onLineChange();
-        } else {
-            resetFrom('size');
-        }
-    }
-
-    // 제품 라인 변경
-    function onLineChange() {
-        const line = document.getElementById('selLine').value;
-        if (!line) { resetFrom('size'); return; }
-
+        const data = getCurrentData();
         const selSize = document.getElementById('selSize');
-        const sizes = [...new Set(DATA.filter(d => d.line === line).map(d => d.size))];
+
+        // 저가형은 라인별로 사이즈 표시
+        let sizes;
+        if (cat === '저가형') {
+            sizes = [...new Set(data.map(d => d.line + ' ' + d.size))];
+        } else {
+            sizes = [...new Set(data.map(d => d.size))];
+        }
 
         selSize.innerHTML = '<option value="">화면 크기 선택</option>';
         sizes.forEach(s => {
@@ -264,12 +414,22 @@
 
     // 화면 크기 변경
     function onSizeChange() {
-        const line = document.getElementById('selLine').value;
-        const size = document.getElementById('selSize').value;
-        if (!size) { resetFrom('type'); return; }
+        const sizeVal = document.getElementById('selSize').value;
+        if (!sizeVal) { resetFrom('type'); return; }
 
+        const data = getCurrentData();
         const selType = document.getElementById('selType');
-        const types = [...new Set(DATA.filter(d => d.line === line && d.size === size).map(d => d.type))];
+
+        let filtered;
+        if (currentCategory === '저가형') {
+            const [line, ...sizeParts] = sizeVal.split(' ');
+            const size = sizeParts.join(' ');
+            filtered = data.filter(d => d.line === line && d.size === size);
+        } else {
+            filtered = data.filter(d => d.size === sizeVal);
+        }
+
+        const types = [...new Set(filtered.map(d => d.type))];
 
         selType.innerHTML = '<option value="">설치 타입 선택</option>';
         types.forEach(t => {
@@ -281,12 +441,21 @@
 
     // 설치 타입 변경
     function onTypeChange() {
-        const line = document.getElementById('selLine').value;
-        const size = document.getElementById('selSize').value;
+        const sizeVal = document.getElementById('selSize').value;
         const type = document.getElementById('selType').value;
         if (!type) { resetFrom('deposit'); return; }
 
-        const deposits = [...new Set(DATA.filter(d => d.line === line && d.size === size && d.type === type).map(d => d.deposit))];
+        const data = getCurrentData();
+        let filtered;
+        if (currentCategory === '저가형') {
+            const [line, ...sizeParts] = sizeVal.split(' ');
+            const size = sizeParts.join(' ');
+            filtered = data.filter(d => d.line === line && d.size === size && d.type === type);
+        } else {
+            filtered = data.filter(d => d.size === sizeVal && d.type === type);
+        }
+
+        const deposits = [...new Set(filtered.map(d => d.deposit))];
 
         if (deposits.length > 1) {
             const selDeposit = document.getElementById('selDeposit');
@@ -300,35 +469,54 @@
             hideResult();
         } else {
             document.getElementById('depositField').style.display = 'none';
-            showResult(line, size, type, deposits[0]);
+            showResult(sizeVal, type, deposits[0]);
         }
     }
 
     // 선납금 변경
     function onDepositChange() {
-        const line = document.getElementById('selLine').value;
-        const size = document.getElementById('selSize').value;
+        const sizeVal = document.getElementById('selSize').value;
         const type = document.getElementById('selType').value;
         const deposit = parseInt(document.getElementById('selDeposit').value);
-        if (!deposit) { hideResult(); return; }
+        if (isNaN(deposit)) { hideResult(); return; }
 
-        showResult(line, size, type, deposit);
+        showResult(sizeVal, type, deposit);
     }
 
     // 결과 표시
-    function showResult(line, size, type, deposit) {
-        const item = DATA.find(d => d.line === line && d.size === size && d.type === type && d.deposit === deposit);
+    function showResult(sizeVal, type, deposit) {
+        const data = getCurrentData();
+        let item;
+
+        if (currentCategory === '저가형') {
+            const [line, ...sizeParts] = sizeVal.split(' ');
+            const size = sizeParts.join(' ');
+            item = data.find(d => d.line === line && d.size === size && d.type === type && d.deposit === deposit);
+        } else {
+            item = data.find(d => d.size === sizeVal && d.type === type && d.deposit === deposit);
+        }
+
         if (!item) return;
 
-        const cat = item.category;
-        const color = getCatColor(cat);
+        const color = getCatColor(currentCategory);
+        const displayName = currentCategory === '저가형' ? item.line : currentCategory;
+
+        // 제품 스펙 표시
+        showSpec(item);
 
         // 결과 헤더
         const header = document.getElementById('resultHeader');
+        let depositHtml = '';
+        if (deposit > 0) {
+            depositHtml = `<div class="deposit-display ${color}">선납금 ${fmt(deposit)}원</div>`;
+        } else {
+            depositHtml = `<div class="deposit-display ${color}">선납금 없음</div>`;
+        }
+
         header.innerHTML = `
-            <div class="result-product-name">${line} ${size}</div>
+            <div class="result-product-name">${displayName} ${item.size}</div>
             <div class="result-spec">${item.typeDetail}</div>
-            <div class="deposit-display ${color}">선납금 ${fmt(deposit)}원</div>
+            ${depositHtml}
         `;
 
         // 가격 카드
@@ -339,9 +527,15 @@
         periods.forEach((period, idx) => {
             const p = item.prices[period];
             const isRecommended = period === '36';
+            let periodLabel = '';
+            if (period === '12') periodLabel = '단기';
+            else if (period === '24') periodLabel = '최저총액';
+            else if (period === '36') periodLabel = '추천';
+            else if (period === '60') periodLabel = '최저월납';
+
             grid.innerHTML += `
                 <div class="price-card color-${color} ${isRecommended ? 'recommended' : ''}">
-                    <div class="price-period"><strong>${period}개월</strong>${period === '24' ? '최저총액' : period === '36' ? '추천' : period === '48' ? '' : '최저월납'}</div>
+                    <div class="price-period"><strong>${period}개월</strong>${periodLabel}</div>
                     <div class="price-monthly">
                         <div class="label">월 렌탈료</div>
                         <div class="amount">${fmt(p.monthly)}<span class="won">원</span></div>
@@ -359,17 +553,60 @@
 
         // 스크롤
         setTimeout(() => {
-            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('specSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
+    }
+
+    // 스펙 정보 표시
+    function showSpec(item) {
+        const specSection = document.getElementById('specSection');
+        const specGrid = document.getElementById('specGrid');
+        const giftBox = document.getElementById('giftBox');
+        const giftItems = document.getElementById('giftItems');
+
+        if (!item.spec) {
+            specSection.style.display = 'none';
+            return;
+        }
+
+        specGrid.innerHTML = `
+            <div class="spec-item">
+                <span class="spec-label">무게</span>
+                <span class="spec-value">${item.spec.weight}</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">크기</span>
+                <span class="spec-value">${item.spec.dimension}</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">VESA</span>
+                <span class="spec-value">${item.spec.vesa}</span>
+            </div>
+            <div class="spec-item">
+                <span class="spec-label">해상도</span>
+                <span class="spec-value">${item.spec.resolution}</span>
+            </div>
+            ${item.spec.led ? `<div class="spec-item"><span class="spec-label">디스플레이</span><span class="spec-value">${item.spec.led}</span></div>` : ''}
+        `;
+
+        if (item.gift) {
+            giftItems.textContent = item.gift;
+            giftBox.style.display = 'flex';
+        } else {
+            giftBox.style.display = 'none';
+        }
+
+        specSection.style.display = 'block';
     }
 
     function hideResult() {
         document.getElementById('resultSection').classList.remove('show');
         document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('specSection').style.display = 'none';
     }
 
     function resetFrom(level) {
-        const levels = ['size', 'type', 'deposit'];
+        const levels = ['type', 'deposit'];
         const idx = levels.indexOf(level);
         for (let i = idx; i < levels.length; i++) {
             const sel = document.getElementById('sel' + levels[i].charAt(0).toUpperCase() + levels[i].slice(1));
@@ -386,7 +623,6 @@
 
     function getPlaceholder(level) {
         const map = {
-            'size': '화면 크기를 먼저 선택하세요',
             'type': '화면 크기를 먼저 선택하세요',
             'deposit': '선납금 선택'
         };
@@ -397,16 +633,39 @@
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        document.getElementById('installBtn').classList.add('show');
     });
 
-    function installApp() {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-            deferredPrompt = null;
-            document.getElementById('installBtn').classList.remove('show');
+    // 이미 설치된 경우 버튼 숨기기
+    window.addEventListener('appinstalled', () => {
+        document.getElementById('installBtn').classList.add('hide');
+    });
+
+    // standalone 모드로 실행 중이면 버튼 숨기기
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('installBtn').classList.add('hide');
         });
+    }
+
+    function installApp() {
+        // Android/Desktop Chrome
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((result) => {
+                if (result.outcome === 'accepted') {
+                    document.getElementById('installBtn').classList.add('hide');
+                }
+                deferredPrompt = null;
+            });
+        }
+        // iOS Safari
+        else if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.navigator.standalone) {
+            alert('홈 화면에 추가하려면:\n1. 하단의 공유 버튼(□↑)을 탭하세요\n2. "홈 화면에 추가"를 선택하세요');
+        }
+        // 기타 브라우저
+        else {
+            alert('브라우저 메뉴에서 "홈 화면에 추가" 또는 "앱 설치"를 선택하세요');
+        }
     }
 
     // 서비스 워커 등록
