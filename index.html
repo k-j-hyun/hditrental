@@ -139,7 +139,19 @@
                     </div>
                     <div class="form-field">
                         <label>대표자(담당자)명</label>
-                        <input type="text" id="estRepresentative" placeholder="예: 유영환" class="est-input">
+                        <div style="display:flex;gap:8px;">
+                            <input type="text" id="estRepresentative" placeholder="예: 유영환" class="est-input" style="flex:1;min-width:0;">
+                            <select id="estTitle" style="flex:0 0 150px;width:150px;">
+                                <option value="대표님">대표님</option>
+                                <option value="총괄님">총괄님</option>
+                                <option value="담당자님">담당자님</option>
+                                <option value="이사님">이사님</option>
+                                <option value="실장님">실장님</option>
+                                <option value="부장님">부장님</option>
+                                <option value="과장님">과장님</option>
+                                <option value="대리님">대리님</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-field">
                         <label>영업 담당자</label>
@@ -178,6 +190,24 @@
                     <img src="images/strength.jpg" alt="현대아이티 경쟁력 비교">
                 </div>
                 <p class="strength-tip">* 이미지를 좌우로 스크롤하거나 확대하여 상세 내용을 확인하세요.</p>
+            </div>
+            <div class="select-group" style="margin-top:18px;">
+                <h2><span class="icon">&#128279;</span> 바로가기</h2>
+                <a href="https://gw.hyundaiit.com/groupware/login.php" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f5f7fa;border-radius:10px;text-decoration:none;color:#222;font-weight:600;font-size:15px;border:1px solid #e0e4ea;">
+                    <span style="font-size:22px;">&#128188;</span> 그룹웨어 바로가기
+                </a>
+                <a href="emailins/01_현대아이티_회사소개서.pdf" download style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f5f7fa;border-radius:10px;text-decoration:none;color:#222;font-weight:600;font-size:15px;border:1px solid #e0e4ea;margin-top:8px;">
+                    <span style="font-size:22px;">&#128196;</span> 현대아이티 회사소개서
+                </a>
+                <a href="emailins/02_IX제품사양서.pdf" download style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f5f7fa;border-radius:10px;text-decoration:none;color:#222;font-weight:600;font-size:15px;border:1px solid #e0e4ea;margin-top:8px;">
+                    <span style="font-size:22px;">&#128196;</span> IX 제품사양서
+                </a>
+                <a href="emailins/03_MX_QLED_제품사양서.pdf" download style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f5f7fa;border-radius:10px;text-decoration:none;color:#222;font-weight:600;font-size:15px;border:1px solid #e0e4ea;margin-top:8px;">
+                    <span style="font-size:22px;">&#128196;</span> MX QLED 제품사양서
+                </a>
+                <a href="emailins/04_MX제품사양서.pdf" download style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f5f7fa;border-radius:10px;text-decoration:none;color:#222;font-weight:600;font-size:15px;border:1px solid #e0e4ea;margin-top:8px;">
+                    <span style="font-size:22px;">&#128196;</span> MX 제품사양서
+                </a>
             </div>
         </div>
 
@@ -823,7 +853,7 @@
     }
 
     function buildPdfHTML(d) {
-        const {company,representative,manager,phone,date,period,item,category,rentalType,footerBase64} = d;
+        const {company,representative,title,manager,phone,date,period,item,category,rentalType,footerBase64} = d;
         const priceInfo = item.prices[period];
         const sizeNum = item.size.replace(/[^0-9]/g,'');
         const displayCat = category === '저가형' ? (item.line || '저가형') : category;
@@ -880,7 +910,7 @@
 
     <!-- 수신자 -->
     <div style="margin-top:18px;margin-bottom:14px;">
-        <div style="font-size:15px;font-weight:800;"><u>${esc(company)} ${esc(representative)} 대표님 귀중</u></div>
+        <div style="font-size:15px;font-weight:800;"><u>${esc(company)} ${esc(representative)} ${esc(title)} 귀중</u></div>
     </div>
 
     <!-- 정보 -->
@@ -974,6 +1004,7 @@
     async function generateQuotePDF() {
         const company = document.getElementById('estCompany').value.trim();
         const representative = document.getElementById('estRepresentative').value.trim();
+        const title = document.getElementById('estTitle').value;
         const manager = document.getElementById('estManager').value.trim();
         const phone = document.getElementById('estPhone').value.trim();
         const date = document.getElementById('estDate').value;
@@ -996,7 +1027,7 @@
             const footerB64 = FOOTER_BASE64;
             const container = document.getElementById('pdfContainer');
             container.innerHTML = buildPdfHTML({
-                company, representative, manager, phone, date, period,
+                company, representative, title, manager, phone, date, period,
                 item: currentItem,
                 footerBase64: footerB64,
                 category: currentCategory,
@@ -1024,7 +1055,7 @@
             }
 
             const sizeShort = currentItem.size.replace(/[^0-9]/g,'');
-            const filename = `${company}${representative}대표님_${sizeShort}${currentCategory}_${period}소유권이전_현대IT전자칠판견적서.pdf`;
+            const filename = `${company}${representative}${title}_${sizeShort}${currentCategory}_${period}소유권이전_현대IT전자칠판견적서.pdf`;
             pdf.save(filename);
 
             container.innerHTML = '';
