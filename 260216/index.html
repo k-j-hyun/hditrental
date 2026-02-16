@@ -15,9 +15,6 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="footer-data.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -34,7 +31,6 @@
         </div>
         <nav class="tab-nav">
             <button class="tab-btn active" onclick="switchTab('quote')">렌탈 견적</button>
-            <button class="tab-btn" onclick="switchTab('estimate')">견적서 출력</button>
             <button class="tab-btn" onclick="switchTab('strength')">현대아이티 강점</button>
         </nav>
     </header>
@@ -122,53 +118,6 @@
                 <p>제품과 규격을 선택하시면<br>렌탈 견적을 확인하실 수 있습니다.</p>
             </div>
         </div>
-
-        <!-- 견적서 출력 탭 -->
-        <div id="tab-estimate" class="tab-content">
-            <div class="select-group">
-                <h2><span class="icon">P</span> 견적서 출력</h2>
-                <div id="estNoProduct" class="empty-state" style="padding:20px;">
-                    <div class="icon">&#128196;</div>
-                    <p>렌탈 견적 탭에서 제품을 먼저 선택한 후<br>이 탭에서 견적서를 생성하세요.</p>
-                </div>
-                <div id="estForm" style="display:none;">
-                    <div class="est-summary" id="estProductSummary"></div>
-                    <div class="form-field">
-                        <label>회사(기관)명</label>
-                        <input type="text" id="estCompany" placeholder="예: 에스티코난" class="est-input">
-                    </div>
-                    <div class="form-field">
-                        <label>대표자(담당자)명</label>
-                        <input type="text" id="estRepresentative" placeholder="예: 유영환" class="est-input">
-                    </div>
-                    <div class="form-field">
-                        <label>영업 담당자</label>
-                        <input type="text" id="estManager" value="고정현대리" class="est-input">
-                    </div>
-                    <div class="form-field">
-                        <label>담당자 연락처</label>
-                        <input type="tel" id="estPhone" value="010-4747-4644" class="est-input">
-                    </div>
-                    <div class="form-field">
-                        <label>견적일자</label>
-                        <input type="date" id="estDate" class="est-input">
-                    </div>
-                    <div class="form-field">
-                        <label>렌탈 기간</label>
-                        <select id="estPeriod">
-                            <option value="">기간 선택</option>
-                        </select>
-                    </div>
-                    <button class="est-download-btn" id="estDownloadBtn" onclick="generateQuotePDF()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                        PDF 견적서 다운로드
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 히든 PDF 렌더링 컨테이너 -->
-        <div id="pdfContainer" style="position:fixed;left:-9999px;top:0;z-index:-1;"></div>
 
         <!-- 경쟁력 비교 탭 -->
         <div id="tab-strength" class="tab-content">
@@ -417,33 +366,7 @@
 
     let currentRentalType = '선납렌탈';
     let currentCategory = null;
-    let currentItem = null;
     let deferredPrompt = null;
-
-    // PDF 견적서용 보조 데이터
-    const PDF_MODELS = {
-        'MX':{'55"':'MX55NZPI','65"':'MX65NZPI','75"':'MX75NZPI','86"':'MX86NZPI','86" 프리미엄':'MX86QNZPI','98"':'MX98NZPI'},
-        'IX':{'65"':'IX65NZPI','75"':'IX75NZPI','86"':'IX86NZPI','98"':'IX98NZPI'}
-    };
-    const PDF_SPECS = {
-        'MX': {
-            main:'광시야각 IPS 패널, 4K UHD, Zero Gap Bonding R.P.Glass(빛방사방지), Knob Dial Hot Key, 지문인식 화상교육 장치(8k 카메라, 마이크 8개, 스피커+우퍼) 기본 내장',
-            comp:'리모콘, 스마트터치펜2개, HDMI 케이블, 터치케이블, 미팅메이트 판서 프로그램 USB'
-        },
-        'IX': {
-            main:'광시야각 IPS 패널, 4K UHD, Zero Gap Bonding R.P.Glass(빛방사방지), Knob Dial Hot Key 화상교육 장치(8k 카메라, 마이크 8개, 스피커+우퍼) 기본 내장',
-            comp:'리모콘, 스마트터치펜2개, HDMI 케이블, 터치케이블, 미팅메이트 판서 프로그램 USB'
-        },
-        '저가형': {
-            main:'4K UHD, 안드로이드 OS 내장',
-            comp:'리모콘, 전자펜, HDMI 케이블, 터치케이블'
-        }
-    };
-    const PDF_STANDS = {
-        '선반':{name:'선반 스탠드',model:'1800S',spec:'거치 가능 무게 : 최대 141Kg\nVESA 지원 : 800 x 600\n32~100인치 제품 거치 가능',dim:'1060 x 1665 x 465 (mm) / 22.5kg',price:440000},
-        '전동':{name:'전동 스탠드',model:'SD1192',spec:'리모콘으로 높낮이 조절, 승하강속도 500mm/s\n최대하중 400kg,\n65~92인치 제품 거치 가능',dim:'1276 x 800 x 1080~1580 (mm) / 49kg',price:770000},
-        '원목':{name:'원목 스탠드',model:'WS-1800',spec:'VESA 지원 : 800 x 600\n32~86인치 제품 거치 가능',dim:'600 x 450 x 1200 (mm) / 15kg',price:330000}
-    };
 
     // 유틸: 숫자 포맷
     function fmt(n) {
@@ -469,7 +392,6 @@
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tab).classList.add('active');
         event.target.classList.add('active');
-        if (tab === 'estimate') updateEstimateTab();
     }
 
     // 렌탈 유형 선택
@@ -615,7 +537,6 @@
         }
 
         if (!item) return;
-        currentItem = item;
 
         const color = getCatColor(currentCategory);
         const displayName = currentCategory === '저가형' ? item.line : currentCategory;
@@ -722,7 +643,6 @@
         document.getElementById('resultSection').classList.remove('show');
         document.getElementById('emptyState').style.display = 'block';
         document.getElementById('specSection').style.display = 'none';
-        currentItem = null;
     }
 
     function resetFrom(level) {
@@ -785,254 +705,6 @@
         // 기타 브라우저
         else {
             alert('브라우저 메뉴에서 "홈 화면에 추가" 또는 "앱 설치"를 선택하세요');
-        }
-    }
-
-    // === 견적서 출력 탭 기능 ===
-    function updateEstimateTab() {
-        const noProduct = document.getElementById('estNoProduct');
-        const form = document.getElementById('estForm');
-        if (!currentItem) {
-            noProduct.style.display = 'block';
-            form.style.display = 'none';
-            return;
-        }
-        noProduct.style.display = 'none';
-        form.style.display = 'block';
-
-        // 제품 요약 표시
-        const displayName = currentCategory === '저가형' ? (currentItem.line + ' ' + currentItem.size) : (currentCategory + ' ' + currentItem.size);
-        const summary = document.getElementById('estProductSummary');
-        summary.innerHTML = `
-            <div class="est-summary-title">${displayName}</div>
-            <div class="est-summary-detail">${currentItem.typeDetail} | ${currentRentalType} | 선납금 ${fmt(currentItem.deposit)}원</div>
-        `;
-
-        // 기간 드롭다운
-        const selPeriod = document.getElementById('estPeriod');
-        const periods = Object.keys(currentItem.prices).sort((a,b)=>parseInt(a)-parseInt(b));
-        selPeriod.innerHTML = '<option value="">기간 선택</option>';
-        periods.forEach(p => {
-            selPeriod.innerHTML += `<option value="${p}">${p}개월 (월 ${fmt(currentItem.prices[p].monthly)}원)</option>`;
-        });
-
-        // 오늘 날짜 기본값
-        if (!document.getElementById('estDate').value) {
-            document.getElementById('estDate').value = new Date().toISOString().slice(0,10);
-        }
-    }
-
-    function buildPdfHTML(d) {
-        const {company,representative,manager,phone,date,period,item,category,rentalType,footerBase64} = d;
-        const priceInfo = item.prices[period];
-        const sizeNum = item.size.replace(/[^0-9]/g,'');
-        const displayCat = category === '저가형' ? (item.line || '저가형') : category;
-        const modelNum = (PDF_MODELS[category] && PDF_MODELS[category][item.size]) || '';
-        const isEdla = category === 'MX' || category === 'IX';
-        const spec = PDF_SPECS[category] || PDF_SPECS['저가형'];
-        const compText = item.gift || spec.comp;
-        const dimText = item.spec.dimension + ', ' + item.spec.weight;
-        const standType = item.type;
-        const isWall = standType === '벽걸이';
-        const selectedStand = PDF_STANDS[standType];
-        const deposit = item.deposit;
-
-        // 스탠드 옵션 행 생성
-        function standRow(key, qty) {
-            const s = PDF_STANDS[key];
-            if (!s) return '';
-            const salePrice = qty > 0 ? s.price : 0;
-            return `<tr>
-                <td rowspan="2" style="border:1px solid #aaa;padding:6px 8px;text-align:center;vertical-align:middle;font-size:11px;font-weight:600;">
-                    ${s.name}<br><span style="font-size:10px;font-weight:400;">(모델명: ${s.model})</span>
-                </td>
-                <td style="border:1px solid #aaa;padding:6px 8px;font-size:10px;line-height:1.5;white-space:pre-line;">${s.spec}</td>
-                <td rowspan="2" style="border:1px solid #aaa;padding:6px 8px;text-align:center;vertical-align:middle;">${qty}</td>
-                <td rowspan="2" style="border:1px solid #aaa;padding:6px 8px;text-align:right;vertical-align:middle;">${fmt(s.price)}</td>
-                <td rowspan="2" style="border:1px solid #aaa;padding:6px 8px;text-align:right;vertical-align:middle;">${qty > 0 ? fmt(salePrice) : '0'}</td>
-            </tr>
-            <tr>
-                <td style="border:1px solid #aaa;padding:4px 8px;font-size:10px;">
-                    <b>크기</b>&nbsp;&nbsp;${s.dim}
-                </td>
-            </tr>`;
-        }
-
-        // 옵션 테이블 (스탠드 2개 표시)
-        let stand1Key, stand2Key, stand1Qty, stand2Qty;
-        if (isWall) {
-            stand1Key='선반'; stand1Qty=0; stand2Key='전동'; stand2Qty=0;
-        } else if (standType === '전동') {
-            stand1Key='선반'; stand1Qty=0; stand2Key='전동'; stand2Qty=1;
-        } else if (standType === '원목') {
-            stand1Key='선반'; stand1Qty=0; stand2Key='원목'; stand2Qty=1;
-        } else {
-            stand1Key='선반'; stand1Qty=0; stand2Key='전동'; stand2Qty=0;
-        }
-        const standTotal = stand2Qty > 0 ? PDF_STANDS[stand2Key].price : 0;
-
-        return `<div style="width:794px;min-height:1123px;padding:40px 50px 30px;font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif;background:#fff;color:#000;line-height:1.4;">
-    <!-- 제목 -->
-    <div style="text-align:center;margin-bottom:6px;">
-        <div style="font-size:34px;font-weight:900;letter-spacing:6px;">견적서</div>
-        <div style="font-size:11px;color:#555;margin-top:3px;">(무통장입금 거래, 세금계산서 발행)</div>
-    </div>
-
-    <!-- 수신자 -->
-    <div style="margin-top:18px;margin-bottom:14px;">
-        <div style="font-size:15px;font-weight:800;"><u>${esc(company)} ${esc(representative)} 대표님 귀중</u></div>
-    </div>
-
-    <!-- 정보 -->
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div style="font-size:12px;">제목: 현대IT 전자칠판 구매 견적</div>
-        <div style="text-align:right;font-size:12px;line-height:1.7;">
-            <div>담당자 ${esc(manager)}</div>
-            <div>연락처 ${esc(phone)}</div>
-            <div>*견적일자 ${date}</div>
-        </div>
-    </div>
-    <div style="text-align:right;font-size:10px;color:#666;margin-top:2px;">(단위 : 원)</div>
-
-    <!-- 전자칠판 메인 테이블 -->
-    <table style="width:100%;border-collapse:collapse;margin-top:4px;font-size:11px;">
-        <thead>
-            <tr style="background:#f0f0f0;">
-                <th style="border:1px solid #aaa;padding:7px;width:130px;">전자칠판</th>
-                <th style="border:1px solid #aaa;padding:7px;">주요 사양</th>
-                <th style="border:1px solid #aaa;padding:7px;width:38px;">수량</th>
-                <th style="border:1px solid #aaa;padding:7px;width:38px;">기간</th>
-                <th style="border:1px solid #aaa;padding:7px;width:76px;">선납금</th>
-                <th style="border:1px solid #aaa;padding:7px;width:66px;">렌탈료</th>
-                <th style="border:1px solid #aaa;padding:7px;width:86px;">합계</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td rowspan="3" style="border:1px solid #aaa;padding:8px;text-align:center;vertical-align:middle;">
-                    <div style="font-size:11px;">현대 IT 전자칠판 ${esc(displayCat)}</div>
-                    <div style="font-size:30px;font-weight:900;margin:3px 0;">${sizeNum}"</div>
-                    ${modelNum ? `<div style="font-size:10px;">${modelNum}</div>` : ''}
-                    ${isEdla ? `<div style="font-size:10px;">EDLA인증</div>` : ''}
-                </td>
-                <td style="border:1px solid #aaa;padding:6px 8px;font-size:10px;line-height:1.6;">${esc(spec.main)}</td>
-                <td rowspan="3" style="border:1px solid #aaa;padding:6px;text-align:center;vertical-align:middle;">1</td>
-                <td rowspan="3" style="border:1px solid #aaa;padding:6px;text-align:center;vertical-align:middle;">${period}</td>
-                <td rowspan="3" style="border:1px solid #aaa;padding:6px;text-align:right;vertical-align:middle;">${fmt(deposit)}</td>
-                <td rowspan="3" style="border:1px solid #aaa;padding:6px;text-align:right;vertical-align:middle;">${fmt(priceInfo.monthly)}</td>
-                <td rowspan="3" style="border:1px solid #aaa;padding:6px;text-align:right;vertical-align:middle;font-weight:700;">${fmt(priceInfo.total)}</td>
-            </tr>
-            <tr>
-                <td style="border:1px solid #aaa;padding:5px 8px;font-size:10px;">
-                    <b>구성품</b>&nbsp;&nbsp;${esc(compText)}
-                </td>
-            </tr>
-            <tr>
-                <td style="border:1px solid #aaa;padding:5px 8px;font-size:10px;">
-                    <b>크기</b>&nbsp;&nbsp;${esc(dimText)}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div style="text-align:right;font-weight:700;font-size:13px;margin:6px 0;">소계 <span style="display:inline-block;width:100px;text-align:right;">${fmt(priceInfo.total)}</span></div>
-
-    <!-- 옵션 테이블 -->
-    <table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;">
-        <thead>
-            <tr style="background:#f0f0f0;">
-                <th style="border:1px solid #aaa;padding:7px;width:120px;">옵션</th>
-                <th style="border:1px solid #aaa;padding:7px;">주요 사양</th>
-                <th style="border:1px solid #aaa;padding:7px;width:44px;">수량</th>
-                <th style="border:1px solid #aaa;padding:7px;width:76px;">단가</th>
-                <th style="border:1px solid #aaa;padding:7px;width:86px;">판매가</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${standRow(stand1Key, stand1Qty)}
-            ${standRow(stand2Key, stand2Qty)}
-        </tbody>
-    </table>
-    <div style="text-align:right;font-size:13px;margin:6px 0;">
-        <div style="font-weight:700;">소계 <span style="display:inline-block;width:100px;text-align:right;">${fmt(standTotal)}</span></div>
-        ${standTotal > 0 ? '<div style="font-weight:700;color:#c00;">무상제공</div>' : ''}
-    </div>
-
-    <!-- 합계 -->
-    <div style="background:#1a237e;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;font-weight:800;font-size:16px;margin-top:8px;">
-        <span>합계(부가세 포함)</span>
-        <span>&#8361;${fmt(priceInfo.total)}</span>
-    </div>
-
-    <!-- 하단 이미지 -->
-    <div style="margin-top:12px;">
-        <img src="${footerBase64}" style="width:100%;display:block;">
-    </div>
-</div>`;
-    }
-
-
-    async function generateQuotePDF() {
-        const company = document.getElementById('estCompany').value.trim();
-        const representative = document.getElementById('estRepresentative').value.trim();
-        const manager = document.getElementById('estManager').value.trim();
-        const phone = document.getElementById('estPhone').value.trim();
-        const date = document.getElementById('estDate').value;
-        const period = document.getElementById('estPeriod').value;
-
-        if (!company || !representative || !manager || !phone || !date || !period) {
-            alert('모든 항목을 입력해주세요.');
-            return;
-        }
-        if (!currentItem) {
-            alert('렌탈 견적 탭에서 제품을 먼저 선택하세요.');
-            return;
-        }
-
-        const btn = document.getElementById('estDownloadBtn');
-        btn.disabled = true;
-        btn.textContent = '생성 중...';
-
-        try {
-            const footerB64 = FOOTER_BASE64;
-            const container = document.getElementById('pdfContainer');
-            container.innerHTML = buildPdfHTML({
-                company, representative, manager, phone, date, period,
-                item: currentItem,
-                footerBase64: footerB64,
-                category: currentCategory,
-                rentalType: currentRentalType
-            });
-
-            const canvas = await html2canvas(container.firstChild, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            });
-
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p','mm','a4');
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            const pdfW = 210;
-            const pdfH = (canvas.height * pdfW) / canvas.width;
-
-            if (pdfH > 297) {
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, 297);
-            } else {
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-            }
-
-            const sizeShort = currentItem.size.replace(/[^0-9]/g,'');
-            const filename = `${company}${representative}대표님_${sizeShort}${currentCategory}_${period}소유권이전_현대IT전자칠판견적서.pdf`;
-            pdf.save(filename);
-
-            container.innerHTML = '';
-        } catch(e) {
-            alert('PDF 생성 중 오류가 발생했습니다: ' + (e.message || e.name || String(e)));
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg> PDF 견적서 다운로드';
         }
     }
 

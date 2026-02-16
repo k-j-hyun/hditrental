@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hdit-rental-v2';
+const CACHE_NAME = 'hdit-rental-v1';
 const ASSETS = [
     '/',
     '/style.css',
